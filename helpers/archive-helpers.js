@@ -1,19 +1,21 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var Promise = require('bluebird');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
  * if you move any files, you'll only need to change your code in one place! Feel free to
  * customize it in any way you wish.
  */
+var promsifyReadDir = Promise.promisify(fs.readdir);
 
-exports.paths = {
+var paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
   list: path.join(__dirname, '../archives/sites.txt')
 };
+
 
 // Used for stubbing paths for tests, do not modify
 exports.initialize = function(pathsObj) {
@@ -29,13 +31,23 @@ exports.readListOfUrls = function(callback) {
 };
 
 exports.isUrlInList = function(url, callback) {
+  // sites.txt
 };
 
 exports.addUrlToList = function(url, callback) {
 };
 
 exports.isUrlArchived = function(url, callback) {
+  var files = fs.readdirSync(paths.archivedSites);
+  for(var i = 0; i < files.length; i++) {
+    if (files[i] === url) {
+      return true;
+    }
+  }
+  return false;
 };
 
 exports.downloadUrls = function(urls) {
 };
+
+exports.paths = paths;
