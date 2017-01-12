@@ -8,8 +8,9 @@ var Promise = require('bluebird');
  * if you move any files, you'll only need to change your code in one place! Feel free to
  * customize it in any way you wish.
  */
-var promsifyReadDir = Promise.promisify(fs.readdir);
-
+var promisifyReadFile = Promise.promisify(fs.readFile);
+var promisifyWriteFile = Promise.promisify(fs.writeFile);
+var promisifyAppend = Promise.promisify(fs.appendFile);
 var paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
@@ -24,27 +25,54 @@ exports.initialize = function(pathsObj) {
   });
 };
 
-// The following function names are provided to you to suggest how you might
+// The following function names are provided to you to suggsest how you might
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
+  return promisifyReadFile(paths.list)
+    .then(function(list) {
+      var result = list.toString().split("\n");
+      callback(result);
+      return result;
+    })
 };
 
 exports.isUrlInList = function(url, callback) {
   // sites.txt
+  exports.readListOfUrls(() =>{})
+  .then(function(list) {
+    var bool = list.indexOf(url) !== -1;
+    callback(bool)
+    return bool;
+  })
+  .catch(function(err){
+    console.log('error', err)
+  });
 };
 
 exports.addUrlToList = function(url, callback) {
+  exports.readListOfUrls(()=>{})
+    .then(function(list) {
+      list[list.length - 1] = url;
+      var listString = list.join('\n');
+      promisifyAppend(paths.list, url + '\n')
+    })
+    .then(function() {
+      console.log('here')
+      callback();
+    })
+
 };
 
 exports.isUrlArchived = function(url, callback) {
   var files = fs.readdirSync(paths.archivedSites);
+  var found = false;
   for(var i = 0; i < files.length; i++) {
     if (files[i] === url) {
-      return true;
+      var found = true;
     }
   }
-  return false;
+  callback(found);
 };
 
 exports.downloadUrls = function(urls) {
