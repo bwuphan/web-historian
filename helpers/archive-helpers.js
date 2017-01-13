@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var Promise = require('bluebird');
+var http = require('http');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -51,16 +52,11 @@ exports.isUrlInList = function(url, callback) {
 };
 
 exports.addUrlToList = function(url, callback) {
-  exports.readListOfUrls(()=>{})
-    .then(function(list) {
-      list[list.length - 1] = url;
-      var listString = list.join('\n');
-      promisifyAppend(paths.list, url + '\n')
-    })
-    .then(function() {
-      console.log('here')
-      callback();
-    })
+
+  promisifyAppend(paths.list, url + '\n')
+  .then(function() {
+    callback();
+  })
 
 };
 
@@ -68,6 +64,7 @@ exports.isUrlArchived = function(url, callback) {
   var files = fs.readdirSync(paths.archivedSites);
   var found = false;
   for(var i = 0; i < files.length; i++) {
+    console.log(files[i] + ' === ' + url)
     if (files[i] === url) {
       var found = true;
     }
@@ -76,6 +73,13 @@ exports.isUrlArchived = function(url, callback) {
 };
 
 exports.downloadUrls = function(urls) {
+  urls.forEach(function(url) {
+    var file = fs.createWriteStream(paths.archivedSites + '/' + url);
+    var request = http.get('http://' + url, function(response) {
+      response.pipe(file);
+    });
+  });
+  promisifyWriteFile(paths.list, '')
 };
 
 exports.paths = paths;

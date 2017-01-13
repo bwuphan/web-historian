@@ -1,2 +1,4 @@
-// Use the code in `archive-helpers.js` to actually download the urls
-// that are waiting.
+#!/usr/bin/env node
+
+var archiveHelpers = require(__dirname + '/' + '../helpers/archive-helpers.js');
+archiveHelpers.readListOfUrls(archiveHelpers.downloadUrls);

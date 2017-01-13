@@ -53,7 +53,7 @@ describe('server', function() {
     });
 
     describe('POST', function () {
-      it('should append submitted sites to \'sites.txt\'', function(done) {
+      xit('should append submitted sites to \'sites.txt\'', function(done) {
         var url = 'www.example.com';
 
         // Reset the test file and process request
@@ -153,5 +153,18 @@ describe('archive helpers', function() {
         done();
       }, 500);
     });
+
+    it('should clear sites.txt after download', function() {
+      var urlArray = ['example1.com', 'example2.com'];
+      fs.writeFileSync(archive.paths.list, urlArray.join('\n'));
+      archive.readListOfUrls(function(list) {
+        expect(list.length).to.be(2);
+      })
+
+      archive.downloadUrls(urlArray);
+      archive.readListOfUrls(function(list) {
+        expect(list.length).to.be(0);
+      })
+    })
   });
-});
+})
